@@ -1,0 +1,32 @@
+{
+  "bridge_id": "frb01",
+  "topic_prefix": "utility/site01",
+  "log_level": "INFO",
+  "mqtt": {
+    "host": "192.168.2.15", "port": 8883, "tls": true,
+    "ca_file": "/persist_data/frb/certs/mqtt_ca.pem",
+    "username": "frb01", "password": "change-me",
+    "protocol": "v311", "qos": 1, "chunk_size": 131072
+  },
+  "ingest": {
+    "http":  {"enabled": true, "bind": "172.31.0.2", "port": 8443, "tls": false,
+              "auth": "basic", "username": "xconnect", "password": "change-me", "capture": false},
+    "ftps":  {"enabled": false, "host": "172.31.0.1", "port": 21, "username": "ftp", "password": "change-me",
+              "ca_file": "", "verify": true, "root": "/", "poll_s": 60},
+    "folder": {"enabled": false}
+  },
+  "delivery": {"require_ack": true, "ack_timeout_s": 120},
+  "storage": {"root": "/persist_data/frb", "retention_days": 30, "max_store_mb": 700},
+  "naming": {"c37232": true, "company": "ACME", "station": "", "device": ""},
+  "ieds": {"default": "ied01", "map": {"7KE85_01": "7ke85-01", "7SX85": "7sx85-01"}},
+  "edge": {
+    "enabled": true,
+    "signals": [
+      {"topic": "DFR01_RcdMade", "ied": "7ke85-01", "role": "record_made"},
+      {"topic": "DFR01_FltNum",  "ied": "7ke85-01", "role": "fault_number"},
+      {"topic": "DFR01_Health",  "ied": "7ke85-01", "role": "health"}
+    ],
+    "outputs": {"broker_connected": "FRB_BrokerOK", "queue_depth": "FRB_Queue", "delivery_ok": "FRB_DeliveryOK",
+                "store_alarm": "FRB_StoreAlarm", "heartbeat": "FRB_Heartbeat"}
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "_comment": "Defaults baked into the SIAPP image. Device Manager parameters and /persist_data/frb/config.json override these.",
+  "bridge_id": "frb01",
+  "topic_prefix": "utility/site01",
+  "mqtt": {"host": "", "port": 8883, "tls": true, "chunk_size": 131072},
+  "ingest": {
+    "http": {"enabled": true, "bind": "0.0.0.0", "port": 8443, "tls": false, "auth": "basic", "username": "xconnect", "password": ""},
+    "ftps": {"enabled": false},
+    "folder": {"enabled": false}
+  },
+  "storage": {"root": "/persist_data/frb", "retention_days": 30, "max_store_mb": 700},
+  "edge": {"enabled": true, "lib_path": "/edgedata.so", "signals": [], "outputs": {}}
+}

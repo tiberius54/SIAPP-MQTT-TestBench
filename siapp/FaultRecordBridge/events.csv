@@ -1,0 +1,10 @@
+topic;quality;value;wait_ms
+DFR01_Health;;1;1000
+DFR01_FltNum;;41;1000
+DFR01_RcdMade;;0;5000
+DFR01_FltNum;;42;500
+DFR01_RcdMade;;1;500
+DFR01_RcdMade;;0;20000
+DFR01_Health;IV;0;10000
+DFR01_Health;;1;10000
+GOTO 4;;;

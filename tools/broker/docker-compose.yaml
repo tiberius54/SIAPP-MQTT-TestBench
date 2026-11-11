@@ -1,0 +1,18 @@
+# Lab broker:  ../gen_lab_certs.sh ./certs <broker-ip>   then
+#              docker run --rm -v ${PWD}:/mosquitto/config eclipse-mosquitto:2.0.22 mosquitto_passwd -c -b /mosquitto/config/passwd frb01 <pw>
+#              docker run --rm -v ${PWD}:/mosquitto/config eclipse-mosquitto:2.0.22 mosquitto_passwd -b /mosquitto/config/passwd ems <pw>
+#              docker compose up -d
+services:
+  broker:
+    image: eclipse-mosquitto:2.0.22
+    container_name: frb-lab-broker
+    ports: ["8883:8883"]
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./acl:/mosquitto/config/acl:ro
+      - ./passwd:/mosquitto/config/passwd:ro
+      - ./certs:/mosquitto/certs:ro
+      - frb-broker-data:/mosquitto/data
+    restart: unless-stopped
+volumes:
+  frb-broker-data:

@@ -1,0 +1,574 @@
+{
+  "apptype": "siapp",
+  "definition": [
+    {
+      "group": "General",
+      "parameters": [
+        {
+          "key": "BRIDGE_ID",
+          "displayName": "Bridge ID",
+          "string": {
+            "minLength": 1,
+            "maxLength": 64,
+            "default": "frb01",
+            "regex": "^[A-Za-z0-9_.-]{1,64}$",
+            "hint": "1-64 characters A-Z a-z 0-9 _ . -"
+          }
+        },
+        {
+          "key": "TOPIC_PREFIX",
+          "displayName": "MQTT topic prefix",
+          "string": {
+            "minLength": 1,
+            "maxLength": 200,
+            "default": "utility/site01",
+            "regex": "^[^#+/][^#+]*[^#+/]$",
+            "hint": "No wildcards, no leading or trailing '/'"
+          }
+        },
+        {
+          "key": "DEFAULT_IED",
+          "displayName": "Default IED ID",
+          "string": {
+            "minLength": 1,
+            "maxLength": 64,
+            "default": "ied01",
+            "regex": "^[A-Za-z0-9_.-]{1,64}$",
+            "hint": "IED ID used in topics when no mapping matches"
+          }
+        },
+        {
+          "key": "COMPANY",
+          "displayName": "Company (C37.232 name)",
+          "string": {
+            "minLength": 1,
+            "maxLength": 64,
+            "default": "COMPANY",
+            "regex": "^[A-Za-z0-9_.-]{1,64}$"
+          }
+        },
+        {
+          "key": "STATION",
+          "displayName": "Station (C37.232 name, blank = from COMTRADE)",
+          "string": {
+            "minLength": 0,
+            "maxLength": 64,
+            "default": "",
+            "regex": "^[A-Za-z0-9_.-]{0,64}$"
+          }
+        },
+        {
+          "key": "LOG_LEVEL",
+          "displayName": "Log level",
+          "choice": {
+            "default": "INFO",
+            "list": [
+              {
+                "displayName": "DEBUG",
+                "value": "DEBUG"
+              },
+              {
+                "displayName": "INFO",
+                "value": "INFO"
+              },
+              {
+                "displayName": "WARNING",
+                "value": "WARNING"
+              },
+              {
+                "displayName": "ERROR",
+                "value": "ERROR"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "group": "IEDs and RTU signals",
+      "parameters": [
+        {
+          "key": "IED_MAP",
+          "displayName": "IED mapping (match=ied;...)",
+          "description": "Text found in COMTRADE station/device name or archive path, mapped to the IED ID used in MQTT topics",
+          "string": {
+            "minLength": 0,
+            "maxLength": 1000,
+            "default": "",
+            "regex": "^([^=;]+=[A-Za-z0-9_.-]{1,64};?)*$",
+            "hint": "e.g. 7KE85_01=7ke85-01;7SX85=7sx85-01"
+          }
+        },
+        {
+          "key": "EDGE_SIGNALS",
+          "displayName": "Input signals (topic:ied:role;...)",
+          "description": "SIAPP read topics; roles record_made, fault_number, health, status",
+          "string": {
+            "minLength": 0,
+            "maxLength": 1000,
+            "default": "",
+            "regex": "^([^:;]+:[A-Za-z0-9_.-]{1,64}:(record_made|fault_number|health|status);?)*$",
+            "hint": "e.g. DFR01_RcdMade:7ke85-01:record_made;DFR01_FltNum:7ke85-01:fault_number;DFR01_Health:7ke85-01:health"
+          }
+        },
+        {
+          "key": "OUT_BROKER_OK",
+          "displayName": "Output topic: broker connected",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": "FRB_BrokerOK"
+          }
+        },
+        {
+          "key": "OUT_QUEUE",
+          "displayName": "Output topic: queue depth",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": "FRB_Queue"
+          }
+        },
+        {
+          "key": "OUT_DELIVERY_OK",
+          "displayName": "Output topic: delivery OK",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": "FRB_DeliveryOK"
+          }
+        },
+        {
+          "key": "OUT_STORE_ALARM",
+          "displayName": "Output topic: store alarm",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": "FRB_StoreAlarm"
+          }
+        },
+        {
+          "key": "OUT_HEARTBEAT",
+          "displayName": "Output topic: heartbeat",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": "FRB_Heartbeat"
+          }
+        }
+      ]
+    },
+    {
+      "group": "MQTT broker",
+      "parameters": [
+        {
+          "key": "MQTT_HOST",
+          "displayName": "Broker host (IP or DNS)",
+          "string": {
+            "minLength": 0,
+            "maxLength": 253,
+            "default": "",
+            "regex": "^[A-Za-z0-9.:-]{0,253}$"
+          }
+        },
+        {
+          "key": "MQTT_PORT",
+          "displayName": "Broker port",
+          "integer": {
+            "min": 1,
+            "max": 65535,
+            "default": 8883,
+            "hint": "8883 = MQTT over TLS"
+          }
+        },
+        {
+          "key": "MQTT_TLS",
+          "displayName": "TLS",
+          "choice": {
+            "default": "1",
+            "list": [
+              {
+                "displayName": "On",
+                "value": "1"
+              },
+              {
+                "displayName": "Off",
+                "value": "0"
+              }
+            ]
+          }
+        },
+        {
+          "key": "MQTT_PROTOCOL",
+          "displayName": "MQTT version",
+          "choice": {
+            "default": "v311",
+            "list": [
+              {
+                "displayName": "3.1.1",
+                "value": "v311"
+              },
+              {
+                "displayName": "5.0",
+                "value": "v5"
+              }
+            ]
+          }
+        },
+        {
+          "key": "MQTT_USER",
+          "displayName": "Username",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": ""
+          }
+        },
+        {
+          "key": "MQTT_PASS",
+          "displayName": "Password",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": ""
+          }
+        },
+        {
+          "key": "MQTT_CA",
+          "displayName": "Broker CA certificate (PEM)",
+          "description": "CA that issued the broker certificate",
+          "blob": {
+            "maxLength": 10240,
+            "fileFilter": [
+              "pem",
+              "crt",
+              "cer",
+              "key"
+            ]
+          }
+        },
+        {
+          "key": "MQTT_CLIENT_CERT",
+          "displayName": "Client certificate (PEM, optional)",
+          "description": "Only if the broker requires client certificates",
+          "blob": {
+            "maxLength": 10240,
+            "fileFilter": [
+              "pem",
+              "crt",
+              "cer",
+              "key"
+            ]
+          }
+        },
+        {
+          "key": "MQTT_CLIENT_KEY",
+          "displayName": "Client private key (PEM, optional)",
+          "description": "Only if the broker requires client certificates",
+          "blob": {
+            "maxLength": 10240,
+            "fileFilter": [
+              "pem",
+              "crt",
+              "cer",
+              "key"
+            ]
+          }
+        },
+        {
+          "key": "CHUNK_KB",
+          "displayName": "Chunk size [KiB]",
+          "integer": {
+            "min": 1,
+            "max": 16384,
+            "default": 128,
+            "hint": "Must not exceed the broker's maximum message size"
+          }
+        }
+      ]
+    },
+    {
+      "group": "Delivery and storage",
+      "parameters": [
+        {
+          "key": "REQUIRE_ACK",
+          "displayName": "Require receiver acknowledgement",
+          "choice": {
+            "default": "1",
+            "list": [
+              {
+                "displayName": "On",
+                "value": "1"
+              },
+              {
+                "displayName": "Off",
+                "value": "0"
+              }
+            ]
+          }
+        },
+        {
+          "key": "ACK_TIMEOUT_S",
+          "displayName": "Acknowledgement timeout [s]",
+          "integer": {
+            "min": 10,
+            "max": 86400,
+            "default": 120
+          }
+        },
+        {
+          "key": "RETENTION_DAYS",
+          "displayName": "Retention after acknowledgement [days]",
+          "integer": {
+            "min": 1,
+            "max": 3650,
+            "default": 30,
+            "hint": "CLO-003 R7 asks for at least 20 days"
+          }
+        },
+        {
+          "key": "MAX_STORE_MB",
+          "displayName": "Maximum store size [MB]",
+          "integer": {
+            "min": 10,
+            "max": 30000,
+            "default": 700,
+            "hint": "Keep below the SIAPP slot flash size"
+          }
+        }
+      ]
+    },
+    {
+      "group": "xConnect receiver (HTTP)",
+      "parameters": [
+        {
+          "key": "HTTP_ENABLE",
+          "displayName": "Enable xConnect receiver",
+          "choice": {
+            "default": "1",
+            "list": [
+              {
+                "displayName": "On",
+                "value": "1"
+              },
+              {
+                "displayName": "Off",
+                "value": "0"
+              }
+            ]
+          }
+        },
+        {
+          "key": "HTTP_PORT",
+          "displayName": "Listen port",
+          "integer": {
+            "min": 1,
+            "max": 65535,
+            "default": 8443
+          }
+        },
+        {
+          "key": "HTTP_TLS",
+          "displayName": "HTTPS",
+          "choice": {
+            "default": "0",
+            "list": [
+              {
+                "displayName": "On",
+                "value": "1"
+              },
+              {
+                "displayName": "Off",
+                "value": "0"
+              }
+            ]
+          }
+        },
+        {
+          "key": "HTTP_AUTH",
+          "displayName": "Authentication",
+          "choice": {
+            "default": "basic",
+            "list": [
+              {
+                "displayName": "Basic",
+                "value": "basic"
+              },
+              {
+                "displayName": "API key",
+                "value": "apikey"
+              },
+              {
+                "displayName": "None (lab only)",
+                "value": "none"
+              }
+            ]
+          }
+        },
+        {
+          "key": "HTTP_USER",
+          "displayName": "Username",
+          "string": {
+            "minLength": 0,
+            "maxLength": 64,
+            "default": "xconnect"
+          }
+        },
+        {
+          "key": "HTTP_PASS",
+          "displayName": "Password",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": ""
+          }
+        },
+        {
+          "key": "HTTP_API_KEY",
+          "displayName": "API key",
+          "string": {
+            "minLength": 0,
+            "maxLength": 256,
+            "default": ""
+          }
+        },
+        {
+          "key": "HTTP_CERT",
+          "displayName": "Receiver certificate (PEM)",
+          "description": "Needed when HTTPS is on",
+          "blob": {
+            "maxLength": 10240,
+            "fileFilter": [
+              "pem",
+              "crt",
+              "cer",
+              "key"
+            ]
+          }
+        },
+        {
+          "key": "HTTP_KEY",
+          "displayName": "Receiver private key (PEM)",
+          "description": "Needed when HTTPS is on",
+          "blob": {
+            "maxLength": 10240,
+            "fileFilter": [
+              "pem",
+              "crt",
+              "cer",
+              "key"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "group": "File Archive Access (FTPS)",
+      "parameters": [
+        {
+          "key": "FTPS_ENABLE",
+          "displayName": "Enable FTPS pull",
+          "choice": {
+            "default": "0",
+            "list": [
+              {
+                "displayName": "On",
+                "value": "1"
+              },
+              {
+                "displayName": "Off",
+                "value": "0"
+              }
+            ]
+          }
+        },
+        {
+          "key": "FTPS_HOST",
+          "displayName": "FTPS server (File Archive Access IP)",
+          "string": {
+            "minLength": 0,
+            "maxLength": 253,
+            "default": "",
+            "regex": "^[A-Za-z0-9.:-]{0,253}$"
+          }
+        },
+        {
+          "key": "FTPS_PORT",
+          "displayName": "FTPS port",
+          "integer": {
+            "min": 1,
+            "max": 65535,
+            "default": 21
+          }
+        },
+        {
+          "key": "FTPS_USER",
+          "displayName": "Username",
+          "string": {
+            "minLength": 0,
+            "maxLength": 64,
+            "default": "ftp"
+          }
+        },
+        {
+          "key": "FTPS_PASS",
+          "displayName": "Password",
+          "string": {
+            "minLength": 0,
+            "maxLength": 128,
+            "default": ""
+          }
+        },
+        {
+          "key": "FTPS_ROOT",
+          "displayName": "Root folder",
+          "string": {
+            "minLength": 1,
+            "maxLength": 200,
+            "default": "/"
+          }
+        },
+        {
+          "key": "FTPS_POLL_S",
+          "displayName": "Poll interval [s]",
+          "integer": {
+            "min": 10,
+            "max": 86400,
+            "default": 60
+          }
+        },
+        {
+          "key": "FTPS_VERIFY",
+          "displayName": "Verify server certificate",
+          "choice": {
+            "default": "1",
+            "list": [
+              {
+                "displayName": "On",
+                "value": "1"
+              },
+              {
+                "displayName": "Off",
+                "value": "0"
+              }
+            ]
+          }
+        },
+        {
+          "key": "FTPS_CA",
+          "displayName": "FTPS server CA (PEM)",
+          "description": "CA of the File Archive Access certificate",
+          "blob": {
+            "maxLength": 10240,
+            "fileFilter": [
+              "pem",
+              "crt",
+              "cer",
+              "key"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

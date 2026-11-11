@@ -1,0 +1,14 @@
+# Bridge account: publishes records/events/status, reads acks and data requests for itself only
+user frb01
+topic write utility/site01/+/dfr/#
+topic write utility/site01/bridge/frb01/status
+topic write utility/site01/bridge/frb01/health
+topic write utility/site01/bridge/frb01/response
+topic read utility/site01/bridge/frb01/ack
+topic read utility/site01/bridge/frb01/request
+
+# Control-center / EMS integration account: reads everything for the site, writes acks and requests
+user ems
+topic read utility/site01/#
+topic write utility/site01/bridge/+/ack
+topic write utility/site01/bridge/+/request
