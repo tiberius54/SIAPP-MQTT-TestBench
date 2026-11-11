@@ -6,15 +6,17 @@ Run the S8000 first (x64, 32 GB per SIAPP, easier debugging), then repeat on the
 
 ## 0. Build machine
 
-1. Clone the SDK: `git clone https://github.com/siemens/siapp-sdk.git` (tested against 2.1.8).
-2. Copy `siapp/FaultRecordBridge` next to the SDK.
-3. Linux: install QEMU binfmt for the arm/v7 build (see SDK README). Podman inside a Hyper-V VM needs
-   `Set-VMProcessor -VMName <VM> -ExposeVirtualizationExtensions $true`.
-4. Build:
-   - S8000: `python siapp-sdk/build.py -t docker -p sws FaultRecordBridge`
-   - CP-8050: `python siapp-sdk/build.py -t docker -p a8000 FaultRecordBridge`
-   Note the **recommended SIAPP slot size** printed by the build.
-5. Optional emulation: `python siapp-sdk/run.py FaultRecordBridge -p sws` (uses `discover.csv` / `events.csv`).
+1. Clone the SDK next to this repo: `git clone https://github.com/siemens/siapp-sdk.git ../siapp-sdk`
+   (tested against 2.1.8). No copying needed; run the commands below from the repo root.
+2. Linux: install QEMU binfmt for the arm/v7 build (see SDK README). Podman inside a Hyper-V VM needs
+   `Set-VMProcessor -VMName <VM> -ExposeVirtualizationExtensions $true`. Windows: Docker Desktop.
+3. Build (use `python` on Windows, where `python3` may be the Store stub):
+   - S8000: `python ../siapp-sdk/build.py -t docker -p sws -v 0.1.0 siapp/FaultRecordBridge`
+   - CP-8050: `python ../siapp-sdk/build.py -t docker -p a8000 -v 0.1.0 siapp/FaultRecordBridge`
+   The package lands in `build/faultrecordbridge-<version>/`. Note the **recommended SIAPP slot size**
+   printed by the build. It covers the image only, so add the `/persist_data` store (`MAX_STORE_MB`).
+   Recorded: sws v0.1.0 = 49 MB rootfs, 100 MB recommended slot, 16 MB `.siapp`.
+4. Optional emulation: `python ../siapp-sdk/run.py siapp/FaultRecordBridge -p sws` (uses `discover.csv` / `events.csv`).
 
 ## 1. Lab broker and EMS stand-in
 

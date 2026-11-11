@@ -42,6 +42,9 @@ pip install paho-mqtt pytest pyftpdlib pyopenssl     # plus mosquitto (apt insta
 python3 -m pytest -q tests                            # 18 passed
 ```
 
+On Windows: install Mosquitto for Windows (on `PATH`) and Git for Windows (the test PKI is made by
+`tools/gen_lab_certs.sh` under Git Bash), then run `python -m pytest -q tests`.
+
 Run the bridge by hand (folder ingest, lab broker):
 
 ```bash
@@ -54,13 +57,18 @@ python3 tools/make_sample_comtrade.py /path/to/inbox/test.zip
 ## Build the SIAPP (Phase 2)
 
 ```bash
-git clone https://github.com/siemens/siapp-sdk.git
-python siapp-sdk/build.py -t docker -p sws   siapp/FaultRecordBridge   # SICAM S8000
-python siapp-sdk/build.py -t docker -p a8000 siapp/FaultRecordBridge   # CP-8031 / CP-8050
+# SDK cloned next to this repo (../siapp-sdk); run from the repo root
+git clone https://github.com/siemens/siapp-sdk.git ../siapp-sdk
+python ../siapp-sdk/build.py -t docker -p sws   -v 0.1.0 siapp/FaultRecordBridge   # SICAM S8000
+python ../siapp-sdk/build.py -t docker -p a8000 -v 0.1.0 siapp/FaultRecordBridge   # CP-8031 / CP-8050
 ```
 
-Upload the `.siapp` from `siapp-sdk/build` with SICAM Device Manager (SIAPP → SIAPPs), set the
-parameters, upload to the device and check SICAM WEB → Applications.
+build.py writes the package to `build/faultrecordbridge-<version>/faultrecordbridge-<sws|a8000>.siapp`
+under the current directory (it uses the SDK's own `build/` only when the project sits inside the SDK
+folder). The sws build is 49 MB unpacked, 16 MB as a `.siapp`, with a recommended slot of 100 MB. That
+figure covers the image only: size the slot to include the `/persist_data` store (`MAX_STORE_MB`).
+Upload the `.siapp` with SICAM Device Manager (SIAPP → SIAPPs), set the parameters, upload to the
+device and check SICAM WEB → Applications.
 
 ## Configuration
 

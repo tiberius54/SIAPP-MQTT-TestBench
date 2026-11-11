@@ -57,7 +57,7 @@ architecture drawing.
    (xConnect gets HTTP 507 and retries; FTPS files stay on the archive) and the store alarm is set.
 6. **Events and health through the SIAPP**, so the MQTT Client app is optional – the CP-8050 allows
    only 4 SICAM 8 applications (SIAPPs do not count).
-7. **Configuration in SICAM Device Manager** via `cmd/parameter_schema.json` (38 parameters, PEM
+7. **Configuration in SICAM Device Manager** via `cmd/parameter_schema.json` (45 parameters, PEM
    blobs for CA/cert/key), with a JSON file and environment overrides as fallback.
 
 ## 5. Failure behaviour

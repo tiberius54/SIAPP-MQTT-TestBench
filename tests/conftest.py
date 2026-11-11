@@ -21,10 +21,29 @@ def free_port() -> int:
     return p
 
 
+def find_bash() -> str:
+    """A POSIX bash. On Windows, plain "bash" resolves to System32\\bash.exe (the WSL launcher),
+    which cannot see Windows temp paths, so prefer Git for Windows' bash."""
+    if os.name != "nt":
+        return "bash"
+    candidates = []
+    git = shutil.which("git")
+    if git:  # ...\Git\cmd\git.exe -> ...\Git\bin\bash.exe
+        candidates.append(os.path.join(os.path.dirname(os.path.dirname(git)), "bin", "bash.exe"))
+    for base in (os.environ.get("ProgramFiles"), os.environ.get("ProgramW6432"), os.environ.get("LOCALAPPDATA")):
+        if base:
+            candidates += [os.path.join(base, "Git", "bin", "bash.exe"),
+                           os.path.join(base, "Programs", "Git", "bin", "bash.exe")]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    pytest.skip("Git Bash not found (needed for tools/gen_lab_certs.sh on Windows)")
+
+
 @pytest.fixture(scope="session")
 def pki():
     d = tempfile.mkdtemp(prefix="frb-pki-")
-    subprocess.run(["bash", os.path.join(ROOT, "tools", "gen_lab_certs.sh"), d, "127.0.0.1", "127.0.0.1"],
+    subprocess.run([find_bash(), os.path.join(ROOT, "tools", "gen_lab_certs.sh"), d, "127.0.0.1", "127.0.0.1"],
                    check=True, capture_output=True)
     yield d
     shutil.rmtree(d, ignore_errors=True)

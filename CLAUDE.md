@@ -12,10 +12,27 @@ Read `docs/DESIGN.md`, `docs/MQTT_INTERFACE.md`, `docs/BENCH_TEST_PLAN.md` first
 - Deploy to the S8000 first (`-p sws`, amd64), then CP-8050 (`-p a8000`, linux/arm/v7).
 
 ## Commands
-- Tests: `python3 -m pytest -q tests` (needs mosquitto, paho-mqtt, pyftpdlib, pyopenssl).
-- Build: `python siapp-sdk/build.py -t docker -p sws siapp/FaultRecordBridge` (SDK 2.1.8 tested).
-- Emulate: `python siapp-sdk/run.py siapp/FaultRecordBridge -p sws` (uses discover.csv / events.csv).
-- Validate config: `PYTHONPATH=siapp/FaultRecordBridge/app python3 -m frbridge --config X --check`.
+Run from the repo root (`C:\SIAPP\frbridge`); the SDK is the sibling folder `..\siapp-sdk`.
+On the Windows build PC use `python` (`python3` is the Microsoft Store stub there).
+- Tests: `python -m pytest -q tests` (18 tests; needs mosquitto, paho-mqtt, pyftpdlib, pyopenssl,
+  and on Windows Git for Windows – the PKI fixture runs `tools/gen_lab_certs.sh` with Git Bash).
+- Build: `python ../siapp-sdk/build.py -t docker -p sws siapp/FaultRecordBridge` (SDK 2.1.8 tested).
+  Output: `build/faultrecordbridge-<version>/faultrecordbridge-sws.siapp` in this repo (git-ignored).
+  Pass `-v` to match `bridge.VERSION` (SDK default is 0.0.1). build.py first runs a privileged
+  `multiarch/qemu-user-static` container; it is only needed for `-p a8000`.
+  sws build (2026-11-10, v0.1.0): rootfs 49 MB, recommended slot 100 MB (image only – add the
+  `/persist_data` store, `MAX_STORE_MB` default 700, when sizing the slot).
+- Emulate: `python ../siapp-sdk/run.py siapp/FaultRecordBridge -p sws` (uses discover.csv / events.csv;
+  note run.py copies them into the SDK's `templates/Simulation`).
+- Validate config: `PYTHONPATH=siapp/FaultRecordBridge/app python -m frbridge --config X --check`
+  (PowerShell: `$env:PYTHONPATH='siapp/FaultRecordBridge/app'; python -m frbridge --config X --check`).
+
+## Build PC notes (Windows 10, Docker Desktop)
+- Docker CLI does not find buildx (shipped in `C:\Program Files\Docker\Docker\resources\cli-plugins`,
+  but `~/.docker/config.json` has no `cliPluginsExtraDirs`), so builds use the deprecated legacy
+  builder. Fine for sws; sort out before the a8000 (arm/v7) build.
+- DNS inside build containers is intermittent (apk/pip "transient error"); retry the build.
+- `core.autocrlf=true` on this PC; `.gitattributes` keeps `*.sh` and `Dockerfile` LF.
 
 ## Constraints (from Siemens documents)
 - A8000 SIAPP resources: ~300 MB RAM shared by all SIAPPs, 60 % CPU max per SIAPP, 1000 MB flash per
