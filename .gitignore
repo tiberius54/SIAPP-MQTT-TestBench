@@ -4,3 +4,8 @@ __pycache__/
 # Siemens reference documents: kept local, not in git (licence/size)
 docs/reference/*
 !docs/reference/README.md
+# Lab broker secrets and receiver output: generated locally, never committed
+tools/broker/certs/
+tools/broker/passwd
+tools/broker/lab-credentials.txt
+received/

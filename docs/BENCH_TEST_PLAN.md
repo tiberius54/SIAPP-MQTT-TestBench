@@ -21,8 +21,14 @@ Run the S8000 first (x64, 32 GB per SIAPP, easier debugging), then repeat on the
 
 ## 1. Lab broker and EMS stand-in
 
-1. `tools/gen_lab_certs.sh ./certs <broker-ip> <siapp-veth-ip>`
-2. Create `tools/broker/passwd` for users `frb01` and `ems` (see `docker-compose.yaml` header), `docker compose up -d`.
+1. `tools/gen_lab_certs.sh tools/broker/certs <broker-ip>[,<broker-ip2>] <siapp-veth-ip>` (the compose file
+   mounts `tools/broker/certs`; list every PC address the RTUs use; an existing CA is reused).
+2. Create `tools/broker/passwd` for users `frb01` and `ems` (see `docker-compose.yaml` header – hash with the
+   broker image and chown to uid 1883), then `docker compose up -d` in `tools/broker`.
+   Certs, `passwd` and `lab-credentials.txt` are git-ignored.
+   Set up 2026-11-10 on the engineering PC: broker cert SAN 172.16.0.93 (internal switch "SICAM S8000")
+   and 172.16.0.77 (external switch "Internet"); receiver cert 127.0.0.1 until the VETH IP is fixed.
+   Verified locally: bridge → broker → `ems_receiver.py` delivery, SHA-256 check, ack and LWT.
 3. Start the reference receiver:
    `python3 tools/ems_receiver.py --host <broker-ip> --cafile certs/ca.pem --user ems --password <pw> --prefix utility/site01 --out ./received`
 4. MQTTX (as in the SICAM A8000 MQTTX test document) subscribed to `utility/site01/#` is useful to watch traffic.
@@ -41,7 +47,7 @@ Run the S8000 first (x64, 32 GB per SIAPP, easier debugging), then repeat on the
 | 2.7 | Firewall | TCP 8443 on VETH0 (xConnect → SIAPP); ICMP on VETH0 for ping; outbound to broker 8883 |
 | 2.8 | Application configuration and licensing → SIAPP Runtimes | add SIAPP Runtime 0 (SIAR); RAM limit 128 MB, CPU share 25 %, process limit 100 (dev guide used 105 MB / 25 %) |
 | 2.9 | SIAPP → SIAPP Runtime 0 → Ports | VETH0 with the container IP; a second port on a physical port group (not the SICAM WEB one) toward the broker network |
-| 2.10 | SIAPP → SIAPPs | add `FaultRecordBridge-sws` (or `-a8000`), flash ≥ recommended size (allow store: 700 MB default on A8000), behaviour after error = Restart, signals read/write = yes |
+| 2.10 | SIAPP → SIAPPs | add `FaultRecordBridge-sws` (or `-a8000`), flash ≥ recommended size + store (`MAX_STORE_MB`, 700 MB default): S8000 1024 MB, CP-8050 ~900 MB (max 1000; set before first deploy – resizing erases `/persist_data`). A 50 MB slot fails on the device with "Extract and deploy of faultrecordbridge as SIAPP 0 failed" (3310) / "Deploy new SIAPP to slot failed" – seen 2026-11-10 on the S8000, fixed with 1024 MB. Behaviour after error = Restart, signals read/write = yes |
 | 2.11 | SIAPP signals | assign read topics `DFR01_*`, write topics `FRB_BrokerOK`, `FRB_Queue`, `FRB_DeliveryOK`, `FRB_StoreAlarm`, `FRB_Heartbeat` |
 | 2.12 | SIAPP parameters | MQTT_HOST, MQTT_USER/PASS, MQTT_CA (ca.pem), HTTP_PASS, COMPANY, DEFAULT_IED … |
 | 2.13 | Upload & Download | Upload to the device; check SICAM WEB → Applications → SIAPP status *running* |

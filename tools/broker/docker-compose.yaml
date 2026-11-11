@@ -1,7 +1,13 @@
-# Lab broker:  ../gen_lab_certs.sh ./certs <broker-ip>   then
-#              docker run --rm -v ${PWD}:/mosquitto/config eclipse-mosquitto:2.0.22 mosquitto_passwd -c -b /mosquitto/config/passwd frb01 <pw>
-#              docker run --rm -v ${PWD}:/mosquitto/config eclipse-mosquitto:2.0.22 mosquitto_passwd -b /mosquitto/config/passwd ems <pw>
-#              docker compose up -d
+# Lab broker (run in tools/broker; certs/, passwd and lab-credentials.txt are git-ignored):
+#   ../gen_lab_certs.sh ./certs <broker-ip>[,<broker-ip2>]          (one cert for several PC addresses)
+#   docker run --rm -v ${PWD}:/mosquitto/config eclipse-mosquitto:2.0.22 sh -c \
+#     'mosquitto_passwd -c -b /mosquitto/config/passwd frb01 <pw> && mosquitto_passwd -b /mosquitto/config/passwd ems <pw> \
+#      && chown 1883:1883 /mosquitto/config/passwd'
+#   docker compose up -d
+# Hash with this image, not a newer local mosquitto_passwd (format may differ). The chown matters: the
+# file is created root/0600 and the broker runs as uid 1883 ("Unable to open pwfile" otherwise).
+# Git Bash on Windows: prefix docker with MSYS_NO_PATHCONV=1 and use "$(pwd -W)" instead of ${PWD}.
+# The "acl has world readable permissions" warning is expected on Windows bind mounts.
 services:
   broker:
     image: eclipse-mosquitto:2.0.22
