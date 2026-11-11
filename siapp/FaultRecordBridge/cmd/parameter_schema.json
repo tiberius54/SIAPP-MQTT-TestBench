@@ -93,7 +93,7 @@
           "description": "Text found in COMTRADE station/device name or archive path, mapped to the IED ID used in MQTT topics",
           "string": {
             "minLength": 0,
-            "maxLength": 1000,
+            "maxLength": 255,
             "default": "",
             "regex": "^([^=;]+=[A-Za-z0-9_.-]{1,64};?)*$",
             "hint": "e.g. 7KE85_01=7ke85-01;7SX85=7sx85-01"
@@ -105,7 +105,7 @@
           "description": "SIAPP read topics; roles record_made, fault_number, health, status",
           "string": {
             "minLength": 0,
-            "maxLength": 1000,
+            "maxLength": 255,
             "default": "",
             "regex": "^([^:;]+:[A-Za-z0-9_.-]{1,64}:(record_made|fault_number|health|status);?)*$",
             "hint": "e.g. DFR01_RcdMade:7ke85-01:record_made;DFR01_FltNum:7ke85-01:fault_number;DFR01_Health:7ke85-01:health"
@@ -217,7 +217,7 @@
         },
         {
           "key": "MQTT_USER",
-          "displayName": "Username",
+          "displayName": "MQTT username",
           "string": {
             "minLength": 0,
             "maxLength": 128,
@@ -226,7 +226,7 @@
         },
         {
           "key": "MQTT_PASS",
-          "displayName": "Password",
+          "displayName": "MQTT password",
           "string": {
             "minLength": 0,
             "maxLength": 128,
@@ -407,7 +407,7 @@
         },
         {
           "key": "HTTP_USER",
-          "displayName": "Username",
+          "displayName": "xConnect username",
           "string": {
             "minLength": 0,
             "maxLength": 64,
@@ -416,7 +416,7 @@
         },
         {
           "key": "HTTP_PASS",
-          "displayName": "Password",
+          "displayName": "xConnect password",
           "string": {
             "minLength": 0,
             "maxLength": 128,
@@ -428,7 +428,7 @@
           "displayName": "API key",
           "string": {
             "minLength": 0,
-            "maxLength": 256,
+            "maxLength": 255,
             "default": ""
           }
         },
@@ -503,7 +503,7 @@
         },
         {
           "key": "FTPS_USER",
-          "displayName": "Username",
+          "displayName": "FTPS username",
           "string": {
             "minLength": 0,
             "maxLength": 64,
@@ -512,7 +512,7 @@
         },
         {
           "key": "FTPS_PASS",
-          "displayName": "Password",
+          "displayName": "FTPS password",
           "string": {
             "minLength": 0,
             "maxLength": 128,

@@ -200,3 +200,27 @@ def test_parameter_schema_matches_config_map():
     for g in schema["definition"]:
         for p in g["parameters"]:
             assert len(p["key"]) <= 50 and len(p["displayName"]) <= 50
+
+
+def test_parameter_schema_device_manager_limits():
+    """Rules SICAM Device Manager enforces when a SIAPP is imported (SDK PARAMETERDESCRIPTION.md,
+    plus the 255-character string limit reported by Device Manager V26.20 on the bench)."""
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    schema = json.load(open(os.path.join(root, "siapp", "FaultRecordBridge", "cmd", "parameter_schema.json")))
+    params = [p for g in schema["definition"] for p in g["parameters"]]
+    names = [p["displayName"] for p in params]
+    dupes = sorted({n for n in names if names.count(n) > 1})
+    assert not dupes, f"displayName must be unique across all groups: {dupes}"
+    for g in schema["definition"]:
+        assert len(g["group"]) <= 50, g["group"]
+    for p in params:
+        if "string" in p:
+            assert p["string"].get("maxLength", 0) <= 255, f"{p['key']}: string maxLength > 255"
+            assert len(p["string"].get("default", "")) <= p["string"].get("maxLength", 255), p["key"]
+        if "blob" in p:
+            assert p["blob"].get("maxLength", 0) <= 10240, f"{p['key']}: blob maxLength > 10240"
+        if "choice" in p:
+            assert p["choice"]["default"] in [c["value"] for c in p["choice"]["list"]], p["key"]
+        for kind in ("string", "integer", "real"):
+            if kind in p:
+                assert len(p[kind].get("hint", "")) <= 1024, f"{p['key']}: hint > 1024"
