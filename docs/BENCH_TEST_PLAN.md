@@ -15,7 +15,8 @@ Run the S8000 first (x64, 32 GB per SIAPP, easier debugging), then repeat on the
    - CP-8050: `python ../siapp-sdk/build.py -t docker -p a8000 -v 0.1.0 siapp/FaultRecordBridge`
    The package lands in `build/faultrecordbridge-<version>/`. Note the **recommended SIAPP slot size**
    printed by the build. It covers the image only, so add the `/persist_data` store (`MAX_STORE_MB`).
-   Recorded: sws v0.1.0 = 49 MB rootfs, 100 MB recommended slot, 16 MB `.siapp`.
+   Recorded (v0.1.0): sws = 49 MB rootfs, 100 MB recommended slot, 16 MB `.siapp`;
+   a8000 = 40 MB rootfs, 86 MB recommended slot, 15 MB `.siapp`.
 4. Optional emulation: `python ../siapp-sdk/run.py siapp/FaultRecordBridge -p sws` (uses `discover.csv` / `events.csv`).
 
 ## 1. Lab broker and EMS stand-in

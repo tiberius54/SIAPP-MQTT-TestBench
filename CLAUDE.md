@@ -20,18 +20,22 @@ On the Windows build PC use `python` (`python3` is the Microsoft Store stub ther
   Output: `build/faultrecordbridge-<version>/faultrecordbridge-sws.siapp` in this repo (git-ignored).
   Pass `-v` to match `bridge.VERSION` (SDK default is 0.0.1). build.py first runs a privileged
   `multiarch/qemu-user-static` container; it is only needed for `-p a8000`.
-  sws build (2026-11-10, v0.1.0): rootfs 49 MB, recommended slot 100 MB (image only – add the
-  `/persist_data` store, `MAX_STORE_MB` default 700, when sizing the slot).
+  Builds 2026-11-10, v0.1.0 (image only – add the `/persist_data` store, `MAX_STORE_MB` default 700,
+  when sizing the slot):
+  sws   rootfs 49 MB, recommended slot 100 MB, .siapp 16 MB;
+  a8000 rootfs 40 MB, recommended slot  86 MB, .siapp 15 MB.
 - Emulate: `python ../siapp-sdk/run.py siapp/FaultRecordBridge -p sws` (uses discover.csv / events.csv;
   note run.py copies them into the SDK's `templates/Simulation`).
 - Validate config: `PYTHONPATH=siapp/FaultRecordBridge/app python -m frbridge --config X --check`
   (PowerShell: `$env:PYTHONPATH='siapp/FaultRecordBridge/app'; python -m frbridge --config X --check`).
 
 ## Build PC notes (Windows 10, Docker Desktop)
-- Docker CLI does not find buildx (shipped in `C:\Program Files\Docker\Docker\resources\cli-plugins`,
-  but `~/.docker/config.json` has no `cliPluginsExtraDirs`), so builds use the deprecated legacy
-  builder. Fine for sws; sort out before the a8000 (arm/v7) build.
-- DNS inside build containers is intermittent (apk/pip "transient error"); retry the build.
+- buildx/BuildKit enabled 2026-11-10 by adding `cliPluginsExtraDirs` =
+  `C:\Program Files\Docker\Docker\resources\cli-plugins` to `~/.docker/config.json`
+  (backup: `config.json.bak-20261110`). Docker Desktop's built-in QEMU handles linux/arm/v7, so the
+  SDK's qemu-user-static step is not needed here.
+- DNS inside build steps is intermittent (apk/pip "transient error", likely the VPN adapters on this
+  PC); normal containers resolve fine. Retry the build – BuildKit caches completed steps.
 - `core.autocrlf=true` on this PC; `.gitattributes` keeps `*.sh` and `Dockerfile` LF.
 
 ## Constraints (from Siemens documents)
